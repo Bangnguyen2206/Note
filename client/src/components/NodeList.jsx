@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { NoteAddOutlined } from "@mui/icons-material";
 import {
   Card,
@@ -10,16 +11,30 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 // import React, { useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 
 export default function NodeList() {
-  const folder = { notes: [{ id: 1, content: "<p>This is new note</p>" }] };
-  const activeNoteId = 0;
+  const folder = { notes: [{ id: "1", content: "<p>This is new note</p>" }] };
+  const { noteId, folderId } = useParams();
+  const [activeNoteId, setActiveNoteId] = useState(noteId);
   return (
     <>
       <Grid container height="100%">
-        <Grid item sx={4}>
+        <Grid
+          item
+          xs={4}
+          sx={{
+            width: "100%",
+            maxWidth: 360,
+            bgcolor: "#F0EBE3",
+            height: "100%",
+            overflowY: "auto",
+            padding: "10px",
+            textAlign: "left",
+          }}
+        >
           <List
             subheader={
               <Box
@@ -49,7 +64,7 @@ export default function NodeList() {
                     sx={{
                       mb: "5px",
                       backgroundColor:
-                        id === activeNoteId ? "rgb(255 211 140)" : null,
+                        id == activeNoteId ? "rgb(255 211 140)" : null,
                     }}
                   >
                     <CardContent
@@ -72,7 +87,7 @@ export default function NodeList() {
             })}
           </List>
         </Grid>
-        <Grid item sx={6}>
+        <Grid item xs={8}>
           <Outlet />
         </Grid>
       </Grid>

@@ -30,6 +30,7 @@ export const AppRoutes = createBrowserRouter([
           {
             path: "/",
             element: <Home />,
+            // loader: async () => {},
             children: [
               {
                 element: <NodeList />,
