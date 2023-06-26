@@ -11,13 +11,14 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 // import React, { useEffect, useState } from "react";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useParams, useLoaderData } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 
 export default function NodeList() {
-  const folder = { notes: [{ id: "1", content: "<p>This is new note</p>" }] };
   const { noteId, folderId } = useParams();
+  const { folder } = useLoaderData();
+  console.log(folder);
   const [activeNoteId, setActiveNoteId] = useState(noteId);
   return (
     <>

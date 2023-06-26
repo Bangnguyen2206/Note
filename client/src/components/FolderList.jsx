@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import { Card, CardContent, List, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -5,20 +6,9 @@ import { useState } from "react";
 import { Box } from "@mui/system";
 import { useParams } from "react-router-dom";
 
-export default function FolderList() {
+export default function FolderList({ folders }) {
   const { folderId } = useParams();
   const [activeFolderId, setActiveFolderId] = useState(folderId);
-
-  const folders = [
-    {
-      id: "1",
-      name: "123",
-    },
-    {
-      id: "2",
-      name: "new folder",
-    },
-  ];
   return (
     <List
       sx={{
