@@ -9,12 +9,10 @@ import {
 } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
+import { useLoaderData } from "react-router-dom";
 
 export default function Note() {
-  const note = {
-    id: 2,
-    content: "<p>This is a new note</p>",
-  };
+  const { note } = useLoaderData();
   //   Create empty
   const [editorState, setEditorState] = useState(() => {
     return EditorState.createEmpty();
@@ -49,7 +47,6 @@ export default function Note() {
         editorClassName="editorClassName"
         onEditorStateChange={handleOnchange}
       />
-      ;
     </>
   );
 }

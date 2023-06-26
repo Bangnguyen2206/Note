@@ -18,7 +18,6 @@ import moment from "moment";
 export default function NodeList() {
   const { noteId, folderId } = useParams();
   const { folder } = useLoaderData();
-  console.log(folder);
   const [activeNoteId, setActiveNoteId] = useState(noteId);
   return (
     <>
@@ -60,6 +59,7 @@ export default function NodeList() {
                   key={id}
                   to={`note/${id}`}
                   style={{ textDecoration: "none" }}
+                  onClick={() => setActiveNoteId(id)}
                 >
                   <Card
                     sx={{
