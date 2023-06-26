@@ -7,6 +7,7 @@ import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import fakeData from "./fakeData/index.js";
 import mongoose from "mongoose";
+import "dotenv/config";
 
 const typeDefs = `#graphql
   type Folder {
@@ -65,21 +66,7 @@ const resolvers = {
 
 const app = express();
 const httpServer = http.createServer(app);
-// mongoose.set('strictQuery', false);
-// mongoose
-//   .connect(URI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(async () => {
-//     console.log('Connected to DB');
-//     await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
-//     console.log('🚀 Server ready at http://localhost:4000');
-//   });
 
-// Connect to DB
-const URI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.jpmynmq.mongodb.net/?retryWrites=true&w=majority`;
-const PORT = process.env.PORT || 4000;
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -89,5 +76,21 @@ await server.start();
 // Middleware
 // prevent cors error
 app.use(cors(), bodyParser.json(), expressMiddleware(server));
-await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
-console.log("Server already at http://localhost:4000");
+
+// Connect to DB
+const URI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.q4lcpbv.mongodb.net/?retryWrites=true&w=majority`;
+const PORT = process.env.PORT || 4000;
+mongoose.set("strictQuery", false);
+mongoose
+  .connect(URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(async () => {
+    console.log("Connected to DB");
+    await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
+    console.log("🚀 Server ready at http://localhost:4000");
+  });
+
+// await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
+// console.log("Server already at http://localhost:4000");
