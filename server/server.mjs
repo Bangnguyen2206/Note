@@ -5,64 +5,15 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import bodyParser from "body-parser";
 import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
-import fakeData from "./fakeData/index.js";
+import "./firebaseConfig.js";
 import mongoose from "mongoose";
 import "dotenv/config";
+import { typeDefs } from "./schemas/index.js";
+import { resolvers } from "./resolvers/index.js";
+import { getAuth } from "firebase-admin/auth";
 
-const typeDefs = `#graphql
-  type Folder {
-    id: String,
-    name: String,
-    createdAt: String,
-    author: Author,
-    notes: [Note]
-  }
-
-  type Note {
-    id: String,
-    content: String,
-  }
-
-  type Author {
-    id: String,
-    name: String
-  }
-
-  type Query{
-    folders: [Folder],
-    folder(folderId: String): Folder,
-    note(noteId: String): Note
-  }
-`;
-const resolvers = {
-  Query: {
-    // All folders
-    folders: () => {
-      return fakeData.folders;
-    },
-    // Get each folder by folder ID
-    folder: (parant, args) => {
-      const folderId = args.folderId;
-      return fakeData.folders.find((folder) => folder.id === folderId);
-    },
-    // Get note by noteId
-    note: (parant, args) => {
-      const noteId = args.noteId;
-      return fakeData.notes.find((note) => note.id === noteId);
-    },
-  },
-  // resolver child
-  Folder: {
-    author: (parent, args) => {
-      const authorId = parent.authorId;
-      return fakeData.authors.find((author) => author.id === authorId);
-    },
-    // Parent: folder is selected
-    notes: (parent, args) => {
-      return fakeData.notes.filter((note) => note.folderId === parent.id);
-    },
-  },
-};
+// Firebase: Token will be refresh after 1 hour
+// Other wise with JWT, we have create refresh token
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -73,9 +24,41 @@ const server = new ApolloServer({
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 await server.start();
+
+const authorizationJWT = async (req, res, next) => {
+  const authorizationHeader = req.headers.authorization;
+  if (authorizationHeader) {
+    const accessToken = authorizationHeader.split(" ")[1];
+    // Verify token from client to server
+    getAuth()
+      .verifyIdToken(accessToken)
+      .then((decodedToken) => {
+        res.locals.uid = decodedToken.uid;
+        next();
+      })
+      .catch((error) => {
+        return res.status(403).json({
+          message: "Forbidden",
+          error: error,
+        });
+      });
+  } else {
+    next();
+  }
+};
 // Middleware
 // prevent cors error
-app.use(cors(), bodyParser.json(), expressMiddleware(server));
+app.use(
+  cors(),
+  authorizationJWT,
+  bodyParser.json(),
+  expressMiddleware(server, {
+    context: async ({ req, res }) => {
+      // tV8IBntwnFNN28hpWwMfHtmxOGi1
+      return { uid: res.locals.uid };
+    },
+  })
+);
 
 // Connect to DB
 const URI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.q4lcpbv.mongodb.net/?retryWrites=true&w=majority`;
@@ -91,6 +74,3 @@ mongoose
     await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
     console.log("🚀 Server ready at http://localhost:4000");
   });
-
-// await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
-// console.log("Server already at http://localhost:4000");
