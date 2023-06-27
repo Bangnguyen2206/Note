@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Box } from "@mui/system";
 import { useParams } from "react-router-dom";
+import NewFolder from "./NewFolder.jsx";
 
 export default function FolderList({ folders }) {
   const { folderId } = useParams();
@@ -30,7 +31,7 @@ export default function FolderList({ folders }) {
           <Typography sx={{ fontWeight: "bold", color: "white" }}>
             Folders
           </Typography>
-          {/* <NewFolder /> */}
+          <NewFolder />
         </Box>
       }
     >

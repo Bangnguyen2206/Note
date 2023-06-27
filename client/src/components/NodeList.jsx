@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { NoteAddOutlined } from "@mui/icons-material";
 import {
@@ -11,7 +12,14 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 // import React, { useEffect, useState } from "react";
-import { Link, Outlet, useParams, useLoaderData } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useParams,
+  useLoaderData,
+  useSubmit,
+  useNavigate,
+} from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 
@@ -19,6 +27,27 @@ export default function NodeList() {
   const { noteId, folderId } = useParams();
   const { folder } = useLoaderData();
   const [activeNoteId, setActiveNoteId] = useState(noteId);
+  const submit = useSubmit();
+  const navigate = useNavigate();
+
+  const handleAddNewNote = () => {
+    // Khi tạo mới thì phải gửi content rỗng
+    submit(
+      { content: "", folderId },
+      { method: "post", action: `/folders/${folderId}` }
+    );
+  };
+  useEffect(() => {
+    if (noteId) {
+      setActiveNoteId(noteId);
+      return;
+    }
+    if (folder?.notes?.[0]) {
+      setActiveNoteId(0);
+      navigate(`note/${folder?.notes?.[0].id}`);
+      return;
+    }
+  }, [noteId, folder.notes]);
   return (
     <>
       <Grid container height="100%">
@@ -45,7 +74,7 @@ export default function NodeList() {
                 }}
               >
                 <Typography sx={{ fontWeight: "bold" }}>Notes</Typography>
-                <Tooltip title="Add Note">
+                <Tooltip title="Add Note" onClick={handleAddNewNote}>
                   <IconButton size="small">
                     <NoteAddOutlined />
                   </IconButton>

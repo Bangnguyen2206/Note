@@ -1,5 +1,7 @@
 import fakeData from "../fakeData/index.js";
+import AuthorModel from "../models/AuthorModel.js";
 import FolderModel from "../models/FolderModel.js";
+import NoteModel from "../models/NoteModel.js";
 
 export const resolvers = {
   Query: {
@@ -8,6 +10,8 @@ export const resolvers = {
     folders: async (parent, args, context) => {
       const folders = await FolderModel.find({
         authorId: context.uid,
+      }).sort({
+        updatedAt: "desc",
       });
       return folders;
     },
@@ -20,28 +24,63 @@ export const resolvers = {
       return foundFolder;
     },
     // Get note by noteId
-    note: (parant, args) => {
+    note: async (parant, args) => {
       const noteId = args.noteId;
-      return fakeData.notes.find((note) => note.id === noteId);
+      const note = await NoteModel.findById(noteId);
+      return note;
     },
   },
   // resolver child
   Folder: {
-    author: (parent, args) => {
+    author: async (parent, args) => {
       const authorId = parent.authorId;
-      return fakeData.authors.find((author) => author.id === authorId);
+      const author = await AuthorModel.findOne({
+        uid: authorId,
+      });
+      return author;
     },
     // Parent: folder is selected
-    notes: (parent, args) => {
-      return fakeData.notes.filter((note) => note.folderId === parent.id);
+    notes: async (parent, args) => {
+      console.log({ parent });
+      const notes = await NoteModel.find({
+        folderId: parent.id,
+      }).sort({
+        updatedAt: "desc",
+      });
+      return notes;
     },
   },
   Mutation: {
-    addFolder: async (parent, args) => {
+    // Create new note
+    addNote: async (parent, args, context) => {
       // Args: data is sent from client side
-      const newFolder = new FolderModel(args);
+      const newNote = new NoteModel(args);
+      await newNote.save();
+      return newFolder;
+    },
+    // Update
+    updateNote: async (parent, args) => {
+      // Args: data is sent from client side
+      // args: dữ liệu được gửi từ phía client
+      const noteId = args.id;
+      const note = await NoteModel.findByIdAndUpdate(noteId, args);
+      return note;
+    },
+    // Create new folder and save in database
+    addFolder: async (parent, args, context) => {
+      // Args: data is sent from client side
+      const newFolder = new FolderModel({ ...args, authorId: context.uid });
       await newFolder.save();
       return newFolder;
+    },
+    // Get data into database
+    register: async (parent, args) => {
+      const foundUser = await AuthorModel.findOne({ uid: args.uid });
+      if (!foundUser) {
+        const newUser = new AuthorModel(args);
+        await newUser.save();
+        return newUser;
+      }
     },
   },
 };

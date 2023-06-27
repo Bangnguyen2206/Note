@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ContentState,
   convertFromHTML,
@@ -9,7 +9,8 @@ import {
 } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
 import draftToHtml from "draftjs-to-html";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useSubmit, useLocation } from "react-router-dom";
+import { debounce } from "@mui/material";
 
 export default function Note() {
   const { note } = useLoaderData();
@@ -22,6 +23,22 @@ export default function Note() {
   useEffect(() => {
     setRawHTML(note.content);
   }, [note.content]);
+  const submit = useSubmit();
+  const location = useLocation();
+
+  useEffect(() => {
+    debounceMemorized(rawHTML, note, location.pathname);
+  }, [location.pathname, rawHTML]);
+
+  const debounceMemorized = useMemo(() => {
+    return debounce((rawHTML, note, pathname) => {
+      if (rawHTML === note.content) return;
+      submit(
+        { ...note, content: rawHTML },
+        { method: "post", action: pathname }
+      );
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     //   Load initial data into rich text: convert to HTML

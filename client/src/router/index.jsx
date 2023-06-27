@@ -6,7 +6,12 @@ import Login from "../pages/Login.jsx";
 import ErrorPage from "../pages/ErrorPage.jsx";
 import NodeList from "../components/NodeList.jsx";
 import Note from "../components/Note.jsx";
-import { noteLoader, notesLoader } from "../utils/noteUtils.js";
+import {
+  addNewNote,
+  noteLoader,
+  notesLoader,
+  updateNote,
+} from "../utils/noteUtils.js";
 import { foldersLoader } from "../utils/folderUtils.js";
 
 const ErrorBoundaryLayout = () => (
@@ -38,10 +43,13 @@ export const AppRoutes = createBrowserRouter([
                 element: <NodeList />,
                 path: `folders/:folderId`,
                 loader: notesLoader,
+                // action: change data
+                action: addNewNote,
                 children: [
                   {
                     element: <Note />,
                     path: `note/:noteId`,
+                    action: updateNote,
                     loader: noteLoader,
                   },
                 ],
