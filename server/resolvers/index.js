@@ -120,6 +120,11 @@ export const resolvers = {
     },
     notification: {
       subscribe: () => pubsub.asyncIterator(["PUSH_NOTIFICATION"]),
+      resolve: (payload) => {
+        return {
+          message: "Successfully",
+        };
+      },
     },
   },
 };

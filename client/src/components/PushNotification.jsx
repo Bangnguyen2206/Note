@@ -61,7 +61,6 @@ export default function PushNotification() {
       };
 
       await new Promise((resolve, reject) => {
-        console.log(reject.prototype);
         client.subscribe(
           {
             query,
