@@ -1,18 +1,35 @@
 import { useEffect, useState } from "react";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { createClient } from "graphql-ws";
 import { GRAPHQL_SUBSCRIPTION_ENDPOINT } from "../utils/constants";
 import { Badge, Menu, MenuItem } from "@mui/material";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import gql from "graphql-tag";
 
-const client = createClient({
-  url: GRAPHQL_SUBSCRIPTION_ENDPOINT,
-});
+const cache = new InMemoryCache();
 
-const query = `subscription PushNotification {
-  notification {
-    message
+const query = gql`
+  subscription pushNotification {
+    notification {
+      message
+    }
   }
-}`;
+`;
+
+const client = new ApolloClient({
+  // Provide required constructor fields
+  cache: cache,
+  uri: GRAPHQL_SUBSCRIPTION_ENDPOINT,
+
+  // Provide some optional constructor fields
+  //   name: "react-web-client",
+  //   version: "1.3",
+  //   queryDeduplication: false,
+  //   defaultOptions: {
+  //     watchQuery: {
+  //       fetchPolicy: "cache-and-network",
+  //     },
+  //   },
+});
 
 export default function PushNotification() {
   const [invisible, setInvisible] = useState(true);
@@ -44,6 +61,7 @@ export default function PushNotification() {
       };
 
       await new Promise((resolve, reject) => {
+        console.log(reject.prototype);
         client.subscribe(
           {
             query,

@@ -28,9 +28,7 @@ export const typeDefs = `#graphql
     folder(folderId: String): Folder,
     note(noteId: String): Note
   }
-  type Message {
-    message: String
-  }
+ 
 
   type Mutation {
       addFolder(name: String!): Folder,
@@ -38,6 +36,10 @@ export const typeDefs = `#graphql
       addNote(content: String!, folderId: ID!): Note,
       updateNote(id: String, content: String!): Note,
       pushNotification(content: String): Message
+  }
+
+  type Message {
+    message: String
   }
   
   type Subscription {

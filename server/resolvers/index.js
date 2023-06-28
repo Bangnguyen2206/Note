@@ -104,7 +104,7 @@ export const resolvers = {
     pushNotification: async (parent, args) => {
       const newNotification = await new NotificationModel(args);
       pubsub.publish("PUSH_NOTIFICATION", {
-        pushNotification: {
+        notification: {
           message: args.content,
         },
       });
