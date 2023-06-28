@@ -1,9 +1,23 @@
-import fakeData from "../fakeData/index.js";
 import AuthorModel from "../models/AuthorModel.js";
 import FolderModel from "../models/FolderModel.js";
 import NoteModel from "../models/NoteModel.js";
+import { GraphQLScalarType } from "graphql";
+import { PubSub } from "graphql-subscriptions";
+import NotificationModel from "../models/NotificationModel.js";
+
+const pubsub = new PubSub();
 
 export const resolvers = {
+  // Custom type Date
+  Date: new GraphQLScalarType({
+    name: "Date",
+    parseValue(value) {
+      return new Date(value);
+    },
+    serialize(value) {
+      return value.toISOString();
+    },
+  }),
   Query: {
     // All folders
     // Get database from mongoseDB
@@ -70,6 +84,11 @@ export const resolvers = {
     addFolder: async (parent, args, context) => {
       // Args: data is sent from client side
       const newFolder = new FolderModel({ ...args, authorId: context.uid });
+      pubsub.publish("FOLDER_CREATED", {
+        folderCreated: {
+          message: "A new folder created",
+        },
+      });
       await newFolder.save();
       return newFolder;
     },
@@ -81,6 +100,26 @@ export const resolvers = {
         await newUser.save();
         return newUser;
       }
+    },
+    pushNotification: async (parent, args) => {
+      const newNotification = await new NotificationModel(args);
+      pubsub.publish("PUSH_NOTIFICATION", {
+        pushNotification: {
+          message: args.content,
+        },
+      });
+      await newNotification.save();
+      return {
+        message: "Success",
+      };
+    },
+  },
+  Subscription: {
+    folderCreated: {
+      subscribe: () => pubsub.asyncIterator(["FOLDER_CREATED"]),
+    },
+    notification: {
+      subscribe: () => pubsub.asyncIterator(["PUSH_NOTIFICATION"]),
     },
   },
 };

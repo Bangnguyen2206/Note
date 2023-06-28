@@ -1,4 +1,8 @@
+// Create cutsomt type for fields such as updatedAt: Date
+
 export const typeDefs = `#graphql
+  scalar Date 
+
   type Folder {
     id: String,
     name: String,
@@ -10,6 +14,7 @@ export const typeDefs = `#graphql
   type Note {
     id: String,
     content: String,
+    updatedAt: Date
   }
 
   type Author {
@@ -23,10 +28,20 @@ export const typeDefs = `#graphql
     folder(folderId: String): Folder,
     note(noteId: String): Note
   }
+  type Message {
+    message: String
+  }
+
   type Mutation {
       addFolder(name: String!): Folder,
       register(uid: String!, name: String!): Author,
-      addNote(content: String!, folderId: ID!): Note
-      updateNote(id: String, content: String!): Note
+      addNote(content: String!, folderId: ID!): Note,
+      updateNote(id: String, content: String!): Note,
+      pushNotification(content: String): Message
+  }
+  
+  type Subscription {
+    folderCreated: Message,
+    notification: Message
   }
 `;

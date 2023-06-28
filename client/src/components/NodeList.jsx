@@ -47,7 +47,7 @@ export default function NodeList() {
       navigate(`note/${folder?.notes?.[0].id}`);
       return;
     }
-  }, [noteId, folder.notes]);
+  }, [noteId, folder?.notes]);
   return (
     <>
       <Grid container height="100%">
